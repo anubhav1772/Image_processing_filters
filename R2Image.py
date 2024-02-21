@@ -8,14 +8,12 @@ np.seterr(divide='ignore', invalid='ignore')
 
 class Filters(R2Pixel):
     def __init__(self, image_name):
-        R2Pixel.__init__(self, image_name)              # Alternatively, use super().__init__(self, image_name)
+        R2Pixel.__init__(self, image_name)   # Alternatively, use super().__init__(self, image_name)
         
     def brighten(self, factor):
+        """Brighten the image by multiplying each pixel component by the factor,
+           then clamping the result to a valid range.
         """
-        Brighten the image by multiplying each pixel component by the factor,
-        then clamping the result to a valid range.
-        """
-
         img = np.array(self.image)
         for i in range(self.channels):
             try:
@@ -28,11 +26,10 @@ class Filters(R2Pixel):
         self.save_image(img, 'output/princeton_small_brightness_'+str(factor)+'.jpg')
     
     def changeContrast(self, factor):
-        """
-        Change the contrast of an image by interpolating between the image
-        and a constant gray image with the average luminance.
-        Interpolation reduces constrast, extrapolation boosts constrast,
-        and negative factors generate inverted images.
+        """Change the contrast of an image by interpolating between the image
+           and a constant gray image with the average luminance.
+           Interpolation reduces constrast, extrapolation boosts constrast,
+           and negative factors generate inverted images.
         """
         img = np.array(self.image)
         avgLumi = 0
@@ -51,8 +48,7 @@ class Filters(R2Pixel):
         self.save_image(img, 'output/c_contrast_'+str(factor)+'.jpg')
     
     def blur(self, sigma):
-        """
-        Blur an image with a Gaussian filter with a given sigma.
+        """Blur an image with a Gaussian filter with a given sigma.
         Gaussian function used: 
             G(x) = exp(-x^2/(2*sigma^2))
         Gaussian filter width:
@@ -96,10 +92,8 @@ class Filters(R2Pixel):
         # output = Image.fromarray(output.astype("uint8"))
         # self.save_image(output, 'output/blur_'+str(sigma)+'.jpg')
 
-    
     def sharpen(self):
-        """
-        Apply a linear sharpening filter to the image.
+        """Apply a linear sharpening filter to the image.
         """
         img = np.array(self.image)[:,:,:3]
         blurred_img = self.blur(2.0)
@@ -113,10 +107,9 @@ class Filters(R2Pixel):
         img = Image.fromarray(img)
         self.save_image(img, 'output/sharpen.jpg')
         
-    
     def detectEdge(self):
-        """
-        Detect edges in an image by convolving it with an edge detection kernel and taking absolute values. 
+        """Detect edges in an image by convolving it with an edge detection kernel 
+           and taking absolute values. 
         Kernel used is:
         [-1,-1, -1], 
         [-1, 8, -1], 
@@ -145,8 +138,7 @@ class Filters(R2Pixel):
         self.save_image(output, 'output/edgedetect.jpg')
 
     def point_sampling(self, sx, sy, h, w):
-        """
-        Point Sampling Method Implementation
+        """Point Sampling Method Implementation
         """
         height, width = h, w
         img = np.array(self.image)[:,:,:3]
@@ -159,8 +151,7 @@ class Filters(R2Pixel):
         return scaled_img
 
     def bilinear_sampling(self, x0, y0, h, w): 
-        """
-        Bilinear Sampling Method Implementation
+        """Bilinear Sampling Method Implementation
         """
         height, width  = h, w
         original = np.array(self.image)[:,:,:3]
@@ -188,8 +179,7 @@ class Filters(R2Pixel):
         return out
 
     def gaussian_sampling(self, x0, y0, h, w, sigma_x, sigma_y):
-        """
-        Gaussian Sampling Method Implementation
+        """Gaussian Sampling Method Implementation
         """
         height, width  = h, w
         original = np.array(self.image)[:, :, :3]
@@ -222,8 +212,7 @@ class Filters(R2Pixel):
         return p    
 
     def scale(self, sx, sy, sampling_method):
-        """
-        Scales an image in x by sx, and y by sy.
+        """Scales an image in x by sx, and y by sy.
         The result depends on the current sampling method:
         (point, bilinear, or Gaussian)
         """
@@ -276,8 +265,8 @@ class Filters(R2Pixel):
         self.save_image(output, 'output/scale_'+sampling_method+'.jpg')
       
     def composite(self, image_top_path, alpha_top_path, operation):
-        """
-        Composites the top image over the base image, using the alpha channel of the top image as a mask.
+        """Composites the top image over the base image, using the alpha channel 
+           of the top image as a mask.
         I = alpha*F + (1-alpha)*B
         """
         if operation=="over":
@@ -292,7 +281,6 @@ class Filters(R2Pixel):
             img[:, :, 1] = alpha_top[:, :, 1] * image_top[:, :, 1] + (1 - alpha_top[:, :, 1]) * img[:, :, 1]
             img[:, :, 2] = alpha_top[:, :, 2] * image_top[:, :, 2] + (1 - alpha_top[:, :, 2]) * img[:, :, 2]
     
-
             output = Image.fromarray(img.astype("uint8"))
             self.save_image(output, 'output/composite.jpg')
 
